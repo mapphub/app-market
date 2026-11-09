@@ -1,15 +1,22 @@
-(async function(){
-  try{ MiniApps.shell&&MiniApps.shell('setChrome',{topBar:false,bottomBar:false}); }catch(e){}
-  const el=document.getElementById('list');
-  const url='https://mapphub.github.io/market/catalog.json';
-  try{
-    const r=await fetch(url,{cache:'no-store'});
-    const j=await r.json();
-    el.innerHTML=(j.apps||[]).map(a=>'<article class="card"><b>'+a.name+'</b><div class="muted">'+a.version+' · '+(a.description||'')+'</div><button data-id="'+a.id+'" data-url="'+(a.packageUrl||'')+'">Установить</button></article>').join('')||'Пусто';
-    el.onclick=async(e)=>{
-      const b=e.target.closest('button[data-url]');
-      if(!b)return;
-      alert('Установка: '+b.dataset.id+'\n'+b.dataset.url);
-    };
-  }catch(e){ el.textContent=String(e.message||e); }
+(async function () {
+  const CATALOG = 'https://mapphub.github.io/catalog.json';
+  const list = document.getElementById('list');
+  try {
+    const res = await fetch(CATALOG);
+    const data = await res.json();
+    for (const app of data.apps || []) {
+      const li = document.createElement('li');
+      li.innerHTML = '<strong>' + (app.name || app.id) + '</strong> <small>v' + (app.version || '') + '</small>';
+      if (app.packageUrl) {
+        const a = document.createElement('a');
+        a.href = app.packageUrl;
+        a.textContent = ' zip';
+        a.target = '_blank';
+        li.appendChild(a);
+      }
+      list.appendChild(li);
+    }
+  } catch (e) {
+    list.textContent = String(e);
+  }
 })();
