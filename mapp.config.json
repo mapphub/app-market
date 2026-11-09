@@ -1,0 +1,4 @@
+{
+  "build": { "outDir": "dist", "copy": ["mappmanifest.json", "miniapps-bridge.js", "icon.svg"] },
+  "package": { "zipName": "app.zip" }
+}

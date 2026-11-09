@@ -1,0 +1,11 @@
+{
+  "id": "market",
+  "name": "Маркет",
+  "version": "0.1.0",
+  "author": "mapphub",
+  "description": "Каталог мини-приложений Mapphub",
+  "icon": "icon.svg",
+  "permissions": [],
+  "web": true,
+  "routes": { "root": "/", "app": "/index.html" }
+}
