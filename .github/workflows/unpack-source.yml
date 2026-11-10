@@ -1,0 +1,25 @@
+name: Unpack market source
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'import/market-src.tgz.b64'
+permissions:
+  contents: write
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unpack
+        run: |
+          set -euo pipefail
+          base64 -d import/market-src.tgz.b64 > /tmp/m.tgz
+          tar xzf /tmp/m.tgz -C .
+          ls -la src | head
+          git config user.name mapphub-ci
+          git config user.email ci@mapphub.local
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "chore: unpack market SvelteKit source"
+          git push
