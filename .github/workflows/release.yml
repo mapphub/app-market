@@ -10,17 +10,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - run: npm install
-      - run: npm run build
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq zip
-      - run: node scripts/pack.mjs
+      - run: |
+          test -d mapp
+          (cd mapp && zip -r -q ../app.zip .)
+          # legacy name for older shells
+          if [ -f mapp/mapp.manifest.json ]; then
+            cp mapp/mapp.manifest.json mappmanifest.json
+            zip -q app.zip mappmanifest.json || true
+          fi
+          ls -lh app.zip
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.2.${{ github.run_number }}
-          name: market v0.2.${{ github.run_number }}
+          tag_name: v0.4.${{ github.run_number }}
+          name: launcher v0.4.${{ github.run_number }}
           files: app.zip
           make_latest: true
         env:

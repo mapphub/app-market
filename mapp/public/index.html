@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <title>Лаунчер</title>
+  <link rel="stylesheet" href="./style.css"/>
+</head>
+<body>
+  <header class="top">
+    <h1>Рабочий стол</h1>
+    <div class="tabs">
+      <button type="button" class="tab active" data-tab="home">Приложения</button>
+      <button type="button" class="tab" data-tab="store">Каталог</button>
+    </div>
+  </header>
+  <section id="panel-home" class="panel">
+    <div id="grid" class="grid"></div>
+  </section>
+  <section id="panel-store" class="panel hidden">
+    <p class="muted">Каталог: <a id="cat-url" href="https://mapphub.github.io/catalog.json" target="_blank">catalog.json</a></p>
+    <div id="store" class="store"></div>
+  </section>
+  <p id="err" class="err"></p>
+  <script src="./script.js"></script>
+</body>
+</html>

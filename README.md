@@ -1,6 +1,7 @@
-# app-market
+# app-market (Лаунчер)
 
-SvelteKit-маркет Mapphub (порт `HeadMad/mini-app-hub` → `apps/market`).
+Домашнее мини-приложение Mapphub: рабочий стол + каталог.
 
-Релиз Actions публикует `app.zip` — URL в каталоге:
-`https://github.com/mapphub/app-market/releases/latest/download/app.zip`
+- id пакета: `market` (совместимость с DEFAULT_HOME_APP)
+- UI: «Лаунчер» / «Рабочий стол»
+- API: `MiniApp.apps(...)`, `MiniApp.hub('open', …)`
