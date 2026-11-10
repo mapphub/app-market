@@ -1,5 +1,6 @@
-# Маркет
+# app-market
 
-Каталог мини-приложений Mapphub.
+SvelteKit-маркет Mapphub (порт `HeadMad/mini-app-hub` → `apps/market`).
 
-Официальное приложение. Каталог: https://mapphub.github.io/market/catalog.json
+Релиз Actions публикует `app.zip` — URL в каталоге:
+`https://github.com/mapphub/app-market/releases/latest/download/app.zip`

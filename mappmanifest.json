@@ -1,11 +1,12 @@
 {
   "id": "market",
   "name": "Маркет",
-  "version": "0.1.0",
-  "description": "Каталог и установка мини-приложений",
+  "version": "0.2.0",
+  "description": "Каталог мини-приложений",
   "icon": "icon.svg",
-  "author": "mapphub",
-  "web": true,
-  "permissions": [],
-  "routes": { "root": "/", "app": "/index.html" }
+  "routes": { "root": ".", "app": ".", "client": "." },
+  "server": { "host": true, "client": false, "network": false },
+  "permissions": ["*", "net", "share", "apps.manage"],
+  "tags": ["system", "market", "official"],
+  "system": true
 }
