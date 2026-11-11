@@ -5,21 +5,35 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  pages: write
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: sudo apt-get update -qq && sudo apt-get install -y -qq zip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci || npm install
+      - run: npm run build
       - run: |
-          test -d mapp
+          test -f mapp/public/index.html
           (cd mapp && zip -r -q ../app.zip .)
           ls -lh app.zip
-      - uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v0.5.${{ github.run_number }}
-          name: home-screen v0.5.${{ github.run_number }}
-          files: app.zip
-          make_latest: true
+      - name: Single latest release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete latest -y 2>/dev/null || true
+          gh release create latest app.zip --title "home-screen latest" --notes "SvelteKit static" --latest
+      - name: gh-pages from mapp/public
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/gh && mkdir -p /tmp/gh
+          cp -a mapp/public/. /tmp/gh/
+          cd /tmp/gh
+          git init && git checkout -b gh-pages
+          git config user.name mapphub-bot
+          git config user.email bot@mapphub.local
+          git add -A && git commit -m "pages"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages

@@ -1,8 +1,8 @@
 {
   "id": "market",
   "name": "Рабочий стол",
-  "version": "0.6.0",
-  "description": "Home-screen: иконка Маркет → каталог из catalog.json (веб-магазин)",
+  "version": "0.7.0",
+  "description": "SvelteKit home-screen: Маркет из catalogUrl оболочки",
   "icon": "icon.svg",
   "routes": {
     "root": "public",
@@ -11,8 +11,7 @@
     "www": "public"
   },
   "server": { "host": true, "client": true, "network": false },
-  "permissions": ["apps", "apps.read", "apps.manage", "hub", "shell", "notify"],
-  "tags": ["system", "launcher", "home", "official"],
+  "permissions": ["apps", "apps.read", "apps.manage", "hub", "shell", "settings.read", "settings.write", "notify"],
   "system": true,
   "launcher": true,
   "author": "mapphub",

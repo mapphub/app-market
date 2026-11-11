@@ -6,17 +6,12 @@ const config = {
     adapter: adapter({
       pages: 'build',
       assets: 'build',
-      fallback: 'index.html',
+      fallback: undefined,
       precompress: false,
-      strict: false
+      strict: true
     }),
-    paths: { relative: true },
-    prerender: {
-      entries: ['*', '/appearance', '/appearance/theme', '/install', '/servers']
-    },
-    router: { type: 'pathname' }
-  },
-  compilerOptions: { runes: true }
+    paths: { relative: true }
+  }
 };
 
 export default config;
