@@ -14,16 +14,11 @@ jobs:
       - run: |
           test -d mapp
           (cd mapp && zip -r -q ../app.zip .)
-          # legacy name for older shells
-          if [ -f mapp/mapp.manifest.json ]; then
-            cp mapp/mapp.manifest.json mappmanifest.json
-            zip -q app.zip mappmanifest.json || true
-          fi
           ls -lh app.zip
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.4.${{ github.run_number }}
-          name: launcher v0.4.${{ github.run_number }}
+          tag_name: v0.5.${{ github.run_number }}
+          name: home-screen v0.5.${{ github.run_number }}
           files: app.zip
           make_latest: true
         env:
