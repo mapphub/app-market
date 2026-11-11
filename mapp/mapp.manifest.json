@@ -1,13 +1,18 @@
 {
   "id": "market",
-  "name": "Лаунчер",
-  "version": "0.4.0",
-  "description": "Рабочий стол установленных мини-приложений и каталог",
+  "name": "Рабочий стол",
+  "version": "0.5.0",
+  "description": "Home-screen: пустой стол с иконкой Маркет, каталог и веб-версии",
   "icon": "icon.svg",
-  "routes": { "root": "public", "app": "public", "client": "public" },
+  "routes": {
+    "root": "public",
+    "app": "public",
+    "client": "public",
+    "www": "public"
+  },
   "server": { "host": true, "client": true, "network": false },
   "permissions": ["apps", "apps.read", "apps.manage", "hub", "shell", "notify"],
-  "tags": ["system", "launcher", "official"],
+  "tags": ["system", "launcher", "home", "official"],
   "system": true,
   "launcher": true,
   "author": "mapphub"
