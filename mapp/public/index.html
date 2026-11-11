@@ -7,25 +7,31 @@
   <link rel="stylesheet" href="./style.css"/>
 </head>
 <body>
-  <!-- Desktop -->
+  <!-- Desktop: Market icon is static so UI is never empty -->
   <section id="view-home" class="view">
     <header class="top">
       <h1>Рабочий стол</h1>
     </header>
-    <div id="desktop" class="grid"></div>
+    <div id="desktop" class="grid">
+      <button type="button" class="tile" id="tile-market">
+        <span class="avatar market"><span class="letter">M</span></span>
+        <span class="label">Маркет</span>
+      </button>
+    </div>
   </section>
 
-  <!-- Market catalog -->
+  <!-- Market = store from catalog.json -->
   <section id="view-market" class="view hidden">
     <header class="top bar">
       <button type="button" class="icon-btn" id="market-back" aria-label="Назад">←</button>
       <h1>Маркет</h1>
+      <button type="button" class="icon-btn" id="market-refresh" aria-label="Обновить">↻</button>
     </header>
-    <p class="muted">Каталог мини-приложений. Нажмите иконку — откроется веб-версия.</p>
-    <div id="catalog" class="grid"></div>
+    <p class="muted">Каталог мини-приложений. Нажмите карточку — откроется веб-версия.</p>
+    <div id="catalog" class="cards"></div>
   </section>
 
-  <!-- In-app browser for web versions -->
+  <!-- In-app browser -->
   <section id="view-browser" class="view browser hidden">
     <header class="top bar">
       <button type="button" class="icon-btn" id="browser-back" aria-label="Назад">←</button>

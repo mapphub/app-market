@@ -1,8 +1,8 @@
 {
   "id": "market",
   "name": "Рабочий стол",
-  "version": "0.5.0",
-  "description": "Home-screen: пустой стол с иконкой Маркет, каталог и веб-версии",
+  "version": "0.6.0",
+  "description": "Home-screen: иконка Маркет → каталог из catalog.json (веб-магазин)",
   "icon": "icon.svg",
   "routes": {
     "root": "public",
@@ -15,5 +15,6 @@
   "tags": ["system", "launcher", "home", "official"],
   "system": true,
   "launcher": true,
-  "author": "mapphub"
+  "author": "mapphub",
+  "webUrl": "https://mapphub.github.io/store/"
 }
