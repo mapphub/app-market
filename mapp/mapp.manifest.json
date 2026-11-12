@@ -1,7 +1,7 @@
 {
   "id": "market",
   "name": "Рабочий стол",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "SvelteKit home-screen: Маркет из catalogUrl оболочки",
   "icon": "icon.svg",
   "routes": {
