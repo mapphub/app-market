@@ -10,8 +10,21 @@
     "client": "public",
     "www": "public"
   },
-  "server": { "host": true, "client": true, "network": false },
-  "permissions": ["apps", "apps.read", "apps.manage", "hub", "shell", "settings.read", "settings.write", "notify"],
+  "server": {
+    "host": true,
+    "client": true,
+    "network": false
+  },
+  "permissions": [
+    "apps",
+    "apps.read",
+    "apps.manage",
+    "hub",
+    "shell",
+    "settings.read",
+    "settings.write",
+    "notify"
+  ],
   "system": true,
   "launcher": true,
   "author": "mapphub",

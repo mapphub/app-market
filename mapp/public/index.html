@@ -1,47 +1,44 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <title>Рабочий стол</title>
-  <link rel="stylesheet" href="./style.css"/>
-</head>
-<body>
-  <!-- Desktop: Market icon is static so UI is never empty -->
-  <section id="view-home" class="view">
-    <header class="top">
-      <h1>Рабочий стол</h1>
-    </header>
-    <div id="desktop" class="grid">
-      <button type="button" class="tile" id="tile-market">
-        <span class="avatar market"><span class="letter">M</span></span>
-        <span class="label">Маркет</span>
-      </button>
-    </div>
-  </section>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <link href="./_app/immutable/entry/start.49qup9DZ.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/BfkzyAkr.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/V2qw7iXd.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/Cr8iCQuB.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/oF97E0Qt.js" rel="modulepreload">
+		<link href="./_app/immutable/entry/app.CF88KWYE.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/Bhahcxuy.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/CerNRW6R.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/BrP36uGt.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/B3V4Gb0h.js" rel="modulepreload">
+		<link href="./_app/immutable/nodes/0.C6y5q5lV.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/dAXFPOag.js" rel="modulepreload">
+		<link href="./_app/immutable/nodes/2.Czb12S6Y.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/DXYeUROf.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/C46RkLY4.js" rel="modulepreload">
+		
+		<link href="./_app/immutable/assets/0.4DkyJE-Z.css" rel="stylesheet">
+  </head>
+  <body data-sveltekit-preload-data="hover">
+    <div style="display: contents">
+			<script>
+				{
+					__sveltekit_lulo9m = {
+						base: new URL(".", location).pathname.slice(0, -1)
+					};
 
-  <!-- Market = store from catalog.json -->
-  <section id="view-market" class="view hidden">
-    <header class="top bar">
-      <button type="button" class="icon-btn" id="market-back" aria-label="Назад">←</button>
-      <h1>Маркет</h1>
-      <button type="button" class="icon-btn" id="market-refresh" aria-label="Обновить">↻</button>
-    </header>
-    <p class="muted">Каталог мини-приложений. Нажмите карточку — откроется веб-версия.</p>
-    <div id="catalog" class="cards"></div>
-  </section>
+					const element = document.currentScript.parentElement;
 
-  <!-- In-app browser -->
-  <section id="view-browser" class="view browser hidden">
-    <header class="top bar">
-      <button type="button" class="icon-btn" id="browser-back" aria-label="Назад">←</button>
-      <h1 id="browser-title" class="title-ellip">…</h1>
-      <button type="button" class="action-btn" id="browser-action">Установить</button>
-    </header>
-    <iframe id="browser-frame" title="web" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
-  </section>
-
-  <p id="err" class="err"></p>
-  <script src="./script.js"></script>
-</body>
+					Promise.all([
+						import("./_app/immutable/entry/start.49qup9DZ.js"),
+						import("./_app/immutable/entry/app.CF88KWYE.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element);
+					});
+				}
+			</script>
+		</div>
+  </body>
 </html>
