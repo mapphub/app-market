@@ -2,6 +2,8 @@ name: Release package
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'mapp/public/**'
   workflow_dispatch:
 permissions:
   contents: write
@@ -24,16 +26,14 @@ jobs:
           npm ci || npm install
           npm run build
           test -f mapp/public/index.html
-          # SvelteKit emits _app/ + index.html etc.
-          ls -la mapp/public | head -30
-          test -d mapp/public/_app || echo "WARN: no _app (unexpected)"
+          ls -la mapp/public | head -40
 
       - name: Commit built mapp/public to main
         run: |
           set -euo pipefail
           git config user.name mapphub-bot
           git config user.email bot@mapphub.local
-          # drop obsolete hand-written assets if any leftover names
+          # remove obsolete hand-written files not in build
           git add -A mapp/public mapp/mapp.manifest.json
           if git diff --cached --quiet; then
             echo "mapp/public already up to date"
@@ -71,7 +71,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          # create or update pages site
           if gh api "repos/${{ github.repository }}/pages" >/dev/null 2>&1; then
             gh api -X PUT "repos/${{ github.repository }}/pages" \
               -f build_type=legacy \
