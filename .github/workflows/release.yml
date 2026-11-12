@@ -11,29 +11,76 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm ci || npm install
-      - run: npm run build
-      - run: |
+
+      - name: Build SvelteKit → mapp/public
+        run: |
+          set -euo pipefail
+          npm ci || npm install
+          npm run build
           test -f mapp/public/index.html
-          (cd mapp && zip -r -q ../app.zip .)
-          ls -lh app.zip
-      - name: Single latest release
+          # SvelteKit emits _app/ + index.html etc.
+          ls -la mapp/public | head -30
+          test -d mapp/public/_app || echo "WARN: no _app (unexpected)"
+
+      - name: Commit built mapp/public to main
+        run: |
+          set -euo pipefail
+          git config user.name mapphub-bot
+          git config user.email bot@mapphub.local
+          # drop obsolete hand-written assets if any leftover names
+          git add -A mapp/public mapp/mapp.manifest.json
+          if git diff --cached --quiet; then
+            echo "mapp/public already up to date"
+          else
+            git commit -m "build: SvelteKit output → mapp/public"
+            git push origin HEAD:main
+          fi
+
+      - name: Package ZIP + single latest release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
+          (cd mapp && zip -r -q ../app.zip .)
+          ls -lh app.zip
           gh release delete latest -y 2>/dev/null || true
-          gh release create latest app.zip --title "home-screen latest" --notes "SvelteKit static" --latest
-      - name: gh-pages from mapp/public
+          gh release create latest app.zip --title "home-screen latest" --notes "SvelteKit static (mapp/public)" --latest
+
+      - name: Deploy identical tree to gh-pages
         run: |
           set -euo pipefail
           rm -rf /tmp/gh && mkdir -p /tmp/gh
           cp -a mapp/public/. /tmp/gh/
           cd /tmp/gh
-          git init && git checkout -b gh-pages
+          git init
+          git checkout -b gh-pages
           git config user.name mapphub-bot
           git config user.email bot@mapphub.local
-          git add -A && git commit -m "pages"
+          git add -A
+          git commit -m "pages: mirror mapp/public (SvelteKit)"
           git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages
+
+      - name: Enable GitHub Pages (gh-pages /)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # create or update pages site
+          if gh api "repos/${{ github.repository }}/pages" >/dev/null 2>&1; then
+            gh api -X PUT "repos/${{ github.repository }}/pages" \
+              -f build_type=legacy \
+              -f source[branch]=gh-pages \
+              -f source[path]=/ || true
+          else
+            gh api -X POST "repos/${{ github.repository }}/pages" \
+              -f build_type=legacy \
+              -f source[branch]=gh-pages \
+              -f source[path]=/ || true
+          fi
+          gh api "repos/${{ github.repository }}/pages" --jq '{html_url,status,source}' || true
