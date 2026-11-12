@@ -6,7 +6,9 @@ const config = {
     adapter: adapter({
       pages: 'build',
       assets: 'build',
-      fallback: undefined,
+      // SPA fallback: shell pkgServe may request /browser without .html;
+      // client router handles the route after index.html loads.
+      fallback: 'index.html',
       precompress: false,
       strict: true
     }),
