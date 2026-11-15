@@ -3,6 +3,81 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <script>
+      (function () {
+        if (typeof window === 'undefined') return;
+        if (window.MiniApp && window.MiniApp.__mapp) return;
+        var pending = new Map();
+        function callHost(category, action, params) {
+          return new Promise(function (resolve, reject) {
+            var rid = Math.random().toString(36).slice(2);
+            pending.set(rid, { resolve: resolve, reject: reject });
+            try {
+              (window.top || window.parent).postMessage(
+                {
+                  type: 'mapp-bridge',
+                  id: rid,
+                  appId: window.__MAPP_APP_ID || 'market',
+                  category: String(category),
+                  action: String(action),
+                  params: params || {}
+                },
+                '*'
+              );
+            } catch (e) {
+              pending.delete(rid);
+              reject(e);
+              return;
+            }
+            setTimeout(function () {
+              if (pending.has(rid)) {
+                pending.delete(rid);
+                reject(new Error('MiniApps timeout: ' + category + '.' + action));
+              }
+            }, 20000);
+          });
+        }
+        window.addEventListener('message', function (e) {
+          var d = e.data;
+          if (!d || d.type !== 'mapp-bridge-result') return;
+          var p = pending.get(d.id);
+          if (!p) return;
+          pending.delete(d.id);
+          if (d.error) p.reject(new Error(d.error));
+          else p.resolve(d.result);
+        });
+        function catProxy(category) {
+          var call = function (action, params) {
+            return callHost(category, action, params || {});
+          };
+          return new Proxy(call, {
+            get: function (fn, prop) {
+              if (prop === 'then' || typeof prop === 'symbol') return;
+              return function (params) {
+                return callHost(category, prop, params || {});
+              };
+            }
+          });
+        }
+        var bridge = new Proxy(
+          { __mapp: 1 },
+          {
+            get: function (_t, c) {
+              if (c === 'then' || typeof c === 'symbol') return;
+              if (c === '__mapp') return 1;
+              if (c === 'appId') return window.__MAPP_APP_ID || 'market';
+              return catProxy(c);
+            }
+          }
+        );
+        window.MiniApps = bridge;
+        window.MiniApp = bridge;
+        try {
+          window.dispatchEvent(new Event('miniapps-ready'));
+          window.dispatchEvent(new Event('miniapp-ready'));
+        } catch (e) {}
+      })();
+    </script>
     %sveltekit.head%
   </head>
   <body data-sveltekit-preload-data="hover">
