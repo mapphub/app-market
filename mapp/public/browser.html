@@ -3,22 +3,97 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <link href="./_app/immutable/entry/start.BN2oy16E.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/BSrD4qJU.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/DqJxj-aE.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/BNz20uhb.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/NmhHY_2P.js" rel="modulepreload">
-		<link href="./_app/immutable/entry/app._iaW3apL.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/DTxmA00z.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/BuzYf4Sv.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/wbHwBC5O.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/BZcVG12a.js" rel="modulepreload">
-		<link href="./_app/immutable/nodes/0.BIFYG7hs.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/BcT8y18e.js" rel="modulepreload">
-		<link href="./_app/immutable/nodes/3.DAe2HQcV.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/Bwfo1uWG.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/5vvoaPvA.js" rel="modulepreload">
-		<link href="./_app/immutable/chunks/C0MqyKW4.js" rel="modulepreload">
+    <script>
+      (function () {
+        if (typeof window === 'undefined') return;
+        if (window.MiniApp && window.MiniApp.__mapp) return;
+        var pending = new Map();
+        function callHost(category, action, params) {
+          return new Promise(function (resolve, reject) {
+            var rid = Math.random().toString(36).slice(2);
+            pending.set(rid, { resolve: resolve, reject: reject });
+            try {
+              (window.top || window.parent).postMessage(
+                {
+                  type: 'mapp-bridge',
+                  id: rid,
+                  appId: window.__MAPP_APP_ID || 'market',
+                  category: String(category),
+                  action: String(action),
+                  params: params || {}
+                },
+                '*'
+              );
+            } catch (e) {
+              pending.delete(rid);
+              reject(e);
+              return;
+            }
+            setTimeout(function () {
+              if (pending.has(rid)) {
+                pending.delete(rid);
+                reject(new Error('MiniApps timeout: ' + category + '.' + action));
+              }
+            }, 20000);
+          });
+        }
+        window.addEventListener('message', function (e) {
+          var d = e.data;
+          if (!d || d.type !== 'mapp-bridge-result') return;
+          var p = pending.get(d.id);
+          if (!p) return;
+          pending.delete(d.id);
+          if (d.error) p.reject(new Error(d.error));
+          else p.resolve(d.result);
+        });
+        function catProxy(category) {
+          var call = function (action, params) {
+            return callHost(category, action, params || {});
+          };
+          return new Proxy(call, {
+            get: function (fn, prop) {
+              if (prop === 'then' || typeof prop === 'symbol') return;
+              return function (params) {
+                return callHost(category, prop, params || {});
+              };
+            }
+          });
+        }
+        var bridge = new Proxy(
+          { __mapp: 1 },
+          {
+            get: function (_t, c) {
+              if (c === 'then' || typeof c === 'symbol') return;
+              if (c === '__mapp') return 1;
+              if (c === 'appId') return window.__MAPP_APP_ID || 'market';
+              return catProxy(c);
+            }
+          }
+        );
+        window.MiniApps = bridge;
+        window.MiniApp = bridge;
+        try {
+          window.dispatchEvent(new Event('miniapps-ready'));
+          window.dispatchEvent(new Event('miniapp-ready'));
+        } catch (e) {}
+      })();
+    </script>
+    <link href="./_app/immutable/entry/start.C77FKkiy.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/HbREW_oq.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/Cv--QCxL.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/DH-9L4N7.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/jOPk53Md.js" rel="modulepreload">
+		<link href="./_app/immutable/entry/app.B_2HuQ57.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/DJYqNCGI.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/4YxS7eCz.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/C3WwheH6.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/DE8gP0D5.js" rel="modulepreload">
+		<link href="./_app/immutable/nodes/0.lrtS-mIo.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/WigqHex5.js" rel="modulepreload">
+		<link href="./_app/immutable/nodes/3.CaAZ3VqP.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/DihRjLMM.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/DLcyAj82.js" rel="modulepreload">
+		<link href="./_app/immutable/chunks/B0GguEhS.js" rel="modulepreload">
 		
 		<link href="./_app/immutable/assets/0.C9ernjcu.css" rel="stylesheet">
   </head>
@@ -26,15 +101,15 @@
     <div style="display: contents">
 			<script>
 				{
-					__sveltekit_1h9lspg = {
+					__sveltekit_1945271 = {
 						base: new URL(".", location).pathname.slice(0, -1)
 					};
 
 					const element = document.currentScript.parentElement;
 
 					Promise.all([
-						import("./_app/immutable/entry/start.BN2oy16E.js"),
-						import("./_app/immutable/entry/app._iaW3apL.js")
+						import("./_app/immutable/entry/start.C77FKkiy.js"),
+						import("./_app/immutable/entry/app.B_2HuQ57.js")
 					]).then(([kit, app]) => {
 						kit.start(app, element);
 					});
