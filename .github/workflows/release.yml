@@ -23,7 +23,6 @@ jobs:
       - name: Read version
         id: ver
         run: |
-          set -euo pipefail
           VER=$(jq -r '.version // empty' mapp/mapp.manifest.json)
           test -n "$VER"
           echo "version=$VER" >> "$GITHUB_OUTPUT"
@@ -33,11 +32,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -euo pipefail
           VER="${{ steps.ver.outputs.version }}"
           CUR=$(gh release view latest --json body,name,tagName -q '.body + " " + .name + " " + .tagName' 2>/dev/null || echo "")
           if [ "${{ github.event_name }}" = "push" ] && echo "$CUR" | grep -qF "$VER"; then
-            echo "Version $VER already released — skip package/release (still allow build commit if sources changed)"
             echo "skip_release=true" >> "$GITHUB_OUTPUT"
           else
             echo "skip_release=false" >> "$GITHUB_OUTPUT"
@@ -45,88 +42,59 @@ jobs:
 
       - name: Build SvelteKit → mapp/public
         run: |
-          set -euo pipefail
           npm ci || npm install
           npm run build
           test -f mapp/public/index.html
-          ls -la mapp/public | head -40
 
       - name: Commit built mapp/public to main
         run: |
-          set -euo pipefail
           git config user.name mapphub-bot
           git config user.email bot@mapphub.local
           git add -A mapp/public mapp/mapp.manifest.json
           if git diff --cached --quiet; then
-            echo "mapp/public already up to date"
+            echo "already up to date"
           else
             git commit -m "build: SvelteKit output → mapp/public"
             git push origin HEAD:main
           fi
 
-      - name: Package ZIP + single latest release
+      - name: Package ZIP + release in app-market repo only
         if: steps.skip.outputs.skip_release != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          set -euo pipefail
           (cd mapp && zip -r -q ../app.zip .)
-          ls -lh app.zip
           gh release delete latest -y 2>/dev/null || true
           gh release create latest app.zip \
             --title "market ${{ steps.ver.outputs.version }}" \
             --notes "version ${{ steps.ver.outputs.version }}" \
             --latest
 
-      - name: Push market.zip to portal
+      - name: Update catalog.json only (no packages/*.zip on portal)
         if: steps.skip.outputs.skip_release != 'true'
         env:
-          PUBLIC_SITE_TOKEN: ${{ secrets.PUBLIC_SITE_TOKEN }}
-          PKG_VER: ${{ steps.ver.outputs.version }}
+          TOKEN: ${{ secrets.PUBLIC_SITE_TOKEN }}
+          VER: ${{ steps.ver.outputs.version }}
         run: |
           set -euo pipefail
-          if [ -z "${PUBLIC_SITE_TOKEN:-}" ]; then
-            echo "PUBLIC_SITE_TOKEN not set — skip portal push"
-            exit 0
-          fi
-          test -f app.zip || (cd mapp && zip -r -q ../app.zip .)
-          CONTENT=$(base64 -w0 app.zip)
-          API="https://api.github.com/repos/mapphub/mapphub.github.io/contents/packages/market.zip"
-          HDR=(-H "Authorization: Bearer $PUBLIC_SITE_TOKEN" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28")
-          SHA=$(curl -fsSL "${HDR[@]}" "$API" 2>/dev/null | jq -r '.sha // empty' || true)
-          BODY=$(jq -n --arg msg "package market@$PKG_VER" --arg content "$CONTENT" --arg sha "$SHA" \
-            '{message:$msg, content:$content} + (if $sha != "" then {sha:$sha} else {} end)')
-          curl -fsSL -X PUT "${HDR[@]}" -H "Content-Type: application/json" -d "$BODY" "$API" >/dev/null
-          echo "portal packages/market.zip updated"
+          TOKEN="${TOKEN:-${{ secrets.GITHUB_TOKEN }}}"
+          PKG="https://github.com/mapphub/app-market/releases/latest/download/app.zip"
+          MU="https://raw.githubusercontent.com/mapphub/app-market/main/mapp/mapp.manifest.json"
+          NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          rm -rf /tmp/site && git clone --depth 1 "https://x-access-token:${TOKEN}@github.com/mapphub/mapphub.github.io.git" /tmp/site
+          jq --arg ver "$VER" --arg pkg "$PKG" --arg mu "$MU" --arg now "$NOW" \
+            '(.apps//[])|=map(if .id=="market" then .version=$ver|.packageUrl=$pkg|.releaseUrl=$pkg|.manifestUrl=$mu else . end)|.updatedAt=$now' \
+            /tmp/site/catalog.json > /tmp/c.json && mv /tmp/c.json /tmp/site/catalog.json
+          cd /tmp/site && git config user.name mapphub-ci && git config user.email ci@mapphub.local
+          git add catalog.json && (git diff --cached --quiet || git commit -m "catalog: market@$VER") && git push || true
 
-      - name: Deploy identical tree to gh-pages
+      - name: Deploy gh-pages
         run: |
-          set -euo pipefail
           rm -rf /tmp/gh && mkdir -p /tmp/gh
           cp -a mapp/public/. /tmp/gh/
           cd /tmp/gh
-          git init
-          git checkout -b gh-pages
+          git init && git checkout -b gh-pages
           git config user.name mapphub-bot
           git config user.email bot@mapphub.local
-          git add -A
-          git commit -m "pages: mirror mapp/public (SvelteKit)"
+          git add -A && git commit -m "pages: mirror mapp/public"
           git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages
-
-      - name: Enable GitHub Pages (gh-pages /)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          if gh api "repos/${{ github.repository }}/pages" >/dev/null 2>&1; then
-            gh api -X PUT "repos/${{ github.repository }}/pages" \
-              -f build_type=legacy \
-              -f source[branch]=gh-pages \
-              -f source[path]=/ || true
-          else
-            gh api -X POST "repos/${{ github.repository }}/pages" \
-              -f build_type=legacy \
-              -f source[branch]=gh-pages \
-              -f source[path]=/ || true
-          fi
-          gh api "repos/${{ github.repository }}/pages" --jq '{html_url,status,source}' || true
