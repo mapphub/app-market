@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ORG_ADMIN_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:
@@ -30,7 +30,7 @@ jobs:
       - name: Skip if version already released
         id: skip
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ORG_ADMIN_TOKEN }}
         run: |
           VER="${{ steps.ver.outputs.version }}"
           CUR=$(gh release view latest --json body,name,tagName -q '.body + " " + .name + " " + .tagName' 2>/dev/null || echo "")
@@ -47,6 +47,8 @@ jobs:
           test -f mapp/public/index.html
 
       - name: Commit built mapp/public to main
+        env:
+          GH_TOKEN: ${{ secrets.ORG_ADMIN_TOKEN }}
         run: |
           git config user.name mapphub-bot
           git config user.email bot@mapphub.local
@@ -55,13 +57,13 @@ jobs:
             echo "already up to date"
           else
             git commit -m "build: SvelteKit output → mapp/public"
-            git push origin HEAD:main
+            git push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" HEAD:main
           fi
 
       - name: Package ZIP + release in app-market repo only
         if: steps.skip.outputs.skip_release != 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ORG_ADMIN_TOKEN }}
         run: |
           (cd mapp && zip -r -q ../app.zip .)
           gh release delete latest -y 2>/dev/null || true
@@ -90,6 +92,8 @@ jobs:
           git add catalog.json && (git diff --cached --quiet || git commit -m "catalog: market@$VER") && git push || true
 
       - name: Deploy gh-pages
+        env:
+          GH_TOKEN: ${{ secrets.ORG_ADMIN_TOKEN }}
         run: |
           rm -rf /tmp/gh && mkdir -p /tmp/gh
           cp -a mapp/public/. /tmp/gh/
@@ -98,4 +102,4 @@ jobs:
           git config user.name mapphub-bot
           git config user.email bot@mapphub.local
           git add -A && git commit -m "pages: mirror mapp/public"
-          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" gh-pages
+          git push -f "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" gh-pages
